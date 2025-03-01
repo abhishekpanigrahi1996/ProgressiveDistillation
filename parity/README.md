@@ -2,17 +2,16 @@
 
 1. Train a teacher model
 
-Go to "scripts"
-Run script ce_train.sh
+Run script `./scripts/script_{mlp/gpt}.sh` to train a MLP or GPT-2 model on parity.
 
-Please check ce_train.sh to modify necessary arguments as needed
+Please modify the bash script for necessary changes (e.g. file paths, hyperparameters, etc.).
 
 2. Distil to a student model
 
-Run script distil.sh
+Run script `./scripts/script_distil_{mlp/gpt}.sh`
 
-Please check distil.sh to modify necessary arguments as needed
+Please modify the bash script for necessary changes (e.g. file paths, hyperparameters, etc.).
 
 3. Compute correlations
 
-Please run python probing.py to get correlations to low degree polynomials on the output of a checkpoint
+Please run `python probing.py` to get correlations to low degree polynomials on the output of a checkpoint.
