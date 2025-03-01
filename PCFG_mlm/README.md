@@ -31,6 +31,8 @@ Important arguments are:
 - pcfg_def = Please use one of the files from PCFG_def, e.g. PCFG_def/yuanzhi_cfg3b.pkl
 - num_train_examples = Number of training examples
 
+Next, to run the probing experiments
+
 - Go to "probing/scripts"
 - Run train_boundary.sh
 
