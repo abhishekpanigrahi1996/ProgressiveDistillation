@@ -1,0 +1,73 @@
+data:
+  data_type: 'hierarchical'
+  data_dimension: 100
+  boolean_sparsity: 0.1
+  num_labels: 8
+  feature_complexity: 5
+  randomize_features: 0
+  subsample: -1
+  num_workers: 0
+  fdata_train: ''
+  fdata_eval: ''
+  pcfg: ''
+
+model:
+  type: 'mlp'
+  hidden_size: 1000
+  head_dim: 8
+  teacher_hidden_size: 50000
+  num_layers: 1
+  teacher_num_layers: 1
+  # the following args are for GPT models
+  n_heads: 4
+  teacher_n_heads: 32
+  vocab_size: 50257
+  use_cls_head: 0
+  tie_word_embeddings: 0
+
+task:
+  method: progressive_distillation
+  saturate_type: 'eval_acc'
+  kl_alpha: 0.1
+  kl_alpha_incre: 0 # NOTE: this can be negative, i.e. decreasing kl_alpha
+  kl_alpha_incre_from: 0
+  kl_alpha_incre_intvl: 100
+  kl_alpha_max: 1
+  kl_alpha_min: 0
+  kl_type: 'forward'
+  eval_thresholds: 0.9
+  teacher_type: "ckpt"
+  max_anneal_temperature: 10
+  teacher_ckpt_dir: ""
+  teacher_ckpt_intvl: 50000
+  teacher_ckpt_step: ""
+  ckpt_multiplier: 1 # NOTE: one-shot distillation can be achieved by setting the multiplier to a large value (e.g. 1e10)
+  teacher_linear_anneal_rate: 0
+  teacher_temp_anneal_rate: 0
+  teacher_min_temperature: 0.2
+
+
+training:
+  optimizer_type: 'sgd'
+  learning_rate: 0.01
+  weight_decay: 0
+  batch_size: 1
+  n_examples: 8000000
+  n_steps: 8000000
+  n_epochs: 1
+  seed: 42
+  temperature: 1
+  teacher_temperature_anneal: 0
+  teacher_temperature_anneal_type: 'linear'
+  warmup_ratio: 0.06
+
+logging:
+  wandb_project: ''
+  wandb_entity: ''
+  logging_path: "logs/log"
+  output_path: "ckpts/ckpts"
+  freq: 10000
+  ckpt_freq: 10000
+  save_ckpt_freq: 1000000
+  token: ""
+

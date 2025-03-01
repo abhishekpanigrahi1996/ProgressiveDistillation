@@ -8,9 +8,9 @@ Please modify the bash script for necessary changes (e.g. file paths, hyperparam
 
 2. Distil to a student model
 
-Run script `./scripts/script_distil_{mlp/gpt}.sh`
+Run script `./scripts/script_distil_{mlp/gpt}.sh`.
 
-Please modify the bash script for necessary changes (e.g. file paths, hyperparameters, etc.).
+Please modify the bash script and `conf/distill_boolean_data.yml` for necessary changes (e.g. file paths, hyperparameters, etc.).
 
 3. Compute correlations
 
