@@ -16,7 +16,7 @@
 
 
 # TODO: please change these accordingly
-PROJ_DIR='/scratch/gpfs/ap34/ProgressiveDistillation/PCFG_autoregressive'
+PROJ_DIR='PCFG_autoregressive'
 DATA_DIR_BASE=$PROJ_DIR'/data_generation/data/'
 MODEL_DIR=$PROJ_DIR
 
@@ -33,7 +33,7 @@ EVAL_FILE=$DATA_DIR_BASE'/yuanzhi_cfg3f.pkl/eval_seed5_boundarylabels_3.pt';
 
 BATCH_SIZE=8     #<-- Instantaneous batch size  
 ACCU_STEPS=64    #<-- Number of accumulate steps per update
-CACHE_DIR='/scratch/gpfs/ap34/hf_models'  #<-- cache directory, to save downloaded bert
+CACHE_DIR=$RUN_DIR'/hf_models'  #<-- cache directory, to save downloaded bert
 
 save_freq=32_000_000   #<-- frequency of saving checkpoint
 
