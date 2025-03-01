@@ -1,0 +1,4 @@
+train_*
+eval_*
+*wandb*
+*.pyc

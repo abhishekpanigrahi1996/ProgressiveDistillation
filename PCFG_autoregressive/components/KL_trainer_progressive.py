@@ -9,7 +9,7 @@ import pdb
 
 class KLTrainer_progressive(Trainer):
     
-    def __init__(self, ref_model, kl_direction, temperature, *args, **kwargs):
+    def __init__(self, ref_model, temperature, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.ref_model = ref_model.to(self.model.device)  #here we say that we have another model to refer to
         self.ref_config = self.ref_model.config
@@ -89,7 +89,7 @@ class KLTrainer_progressive(Trainer):
 
             if self.distill_version == 'gt_label':
               kl_loss = torch.sum(ref_probs * log_probs, axis=-1, keepdim=True)
-              
+
             elif self.distill_version == 'topk':
               # learn from the top k choices in the entire vocab
               topk_ref_probs, topk_indices = torch.topk(ref_probs, self.distill_topk, dim=-1)
@@ -97,16 +97,12 @@ class KLTrainer_progressive(Trainer):
               kl_loss = torch.sum(topk_ref_probs * topk_log_probs, axis=-1, keepdim=True)
             
             num_active_elements = padding_mask.numel() - padding_mask.long().sum()
-            
-            auto_loss = log_probs.gather(dim=-1, index=labels)            
-            auto_loss.masked_fill_(padding_mask, 0.0)
-            auto_loss = auto_loss.sum() / num_active_elements
 
             kl_loss.masked_fill_(padding_mask, 0.0)
             kl_loss = kl_loss.sum() / num_active_elements
 
-            loss = self.curr_alpha * auto_loss + (1.-self.curr_alpha) * kl_loss
-            
+            loss = kl_loss
+
 
         else:
             if not self.eval_start:

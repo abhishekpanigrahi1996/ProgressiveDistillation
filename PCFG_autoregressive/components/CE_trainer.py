@@ -1,14 +1,11 @@
 from transformers import Trainer
 from typing import Dict, Optional
 import torch 
-import pdb 
 import torch
-from torch.utils.data import DataLoader, Dataset, SequentialSampler
+from torch.utils.data import SequentialSampler
 
-from torch.utils.data import DataLoader
-from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
-from transformers.trainer_utils import EvalLoopOutput, has_length, denumpify_detensorize, EvalPrediction
-from transformers.trainer_pt_utils import find_batch_size, nested_numpify, nested_concat, nested_detach
+from typing import Any, Dict, List, Optional, Tuple, Union
+from transformers.trainer_pt_utils import nested_detach
 
 
 class CETrainer(Trainer):
@@ -45,7 +42,6 @@ class CETrainer(Trainer):
         num_active_elements = padding_mask.numel() - padding_mask.long().sum()
         acc = accs.sum() / (1e-10 + num_active_elements)
 
-        #self.log({"accuracy": acc.item(), 'token_count': num_active_elements.item()})
         self.eval_acc += acc.item() 
         self.eval_num += 1
         
@@ -53,13 +49,7 @@ class CETrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False):
 
-        # this is a buggy way of implementing label shift
-        #if self.args.shift_labels:
-        #    inputs = {}
-        #    inputs['input_ids'] = (incoming_inputs['input_ids'] - 2) % model.config.vocab_size
-        #    inputs['labels'] = (incoming_inputs['labels'] - 2) % model.config.vocab_size
-        #else:
-        #    inputs = incoming_inputs   
+ 
         ret = super().compute_loss(model, inputs, return_outputs=return_outputs)
         self.step_cnt += 1
 
@@ -74,26 +64,13 @@ class CETrainer(Trainer):
                 self.eval_acc = 0.
                 self.eval_num = 0.
 
-            # with torch.no_grad():
-            #   if self.step_cnt % self.logging_steps == 0:
-            #     # check for accuracy
-            #     labels = inputs.pop("labels")
-            #     outputs = model(**inputs)
-            #     logits = outputs["logits"]
-            #     predicted_labels = logits.argmax(-1)
-
-            #     accuracy = (predicted_labels == labels).float().mean()
-            #     self.log({'accuracy': accuracy.item()})
-
         return ret  
 
     # custom log to include the step number
     def log(self, logs: Dict[str, float]) -> None:
         if self.state.epoch is not None:
             logs["epoch"] = round(self.state.epoch, 2)
-        #if self.args.include_num_input_tokens_seen:
-        #    logs["num_input_tokens_seen"] = self.state.num_input_tokens_seen
-
+        
 
         # track the step as the number of batches seen
         # originally step = self.state.global_step

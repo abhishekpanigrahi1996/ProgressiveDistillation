@@ -1,25 +1,24 @@
+import os
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, AutoConfig
 from transformers import HfArgumentParser, DataCollatorForSeq2Seq
 from components.all_arguments import ModelArguments, TrainingArguments, DataArguments
 from components.load_data import encode_data
-from datasets import Dataset, load_from_disk
+from datasets import Dataset
 from transformers import Trainer
 
-import os
 import pandas as pd
-import pickle
 import numpy
 from tqdm import tqdm
 
-from torch.utils.tensorboard import SummaryWriter
-import glob
 from transformers import set_seed
 
 
 def main():
     parser = HfArgumentParser((ModelArguments,TrainingArguments,DataArguments))
     model_args, training_args, data_args = parser.parse_args_into_dataclasses() 
+    os.environ["WANDB_PROJECT"]=training_args.project_name
+    os.environ["WANDB_MODE"]="offline"
 
     tokenizer = AutoTokenizer.from_pretrained(model_args.model_name_or_path,
                                               cache_dir=model_args.cache_dir,)
@@ -27,10 +26,12 @@ def main():
 
     ref_config = AutoConfig.from_pretrained(model_args.model_name_or_path,
                                             cache_dir=model_args.cache_dir,)
+    print (ref_config)
     ref_config.hidden_size=model_args.hidden_size
     ref_config.num_layers=model_args.n_layers
     ref_config.intermediate_size=4*ref_config.hidden_size
     ref_config.num_heads=model_args.n_heads
+    ref_config.n_head=model_args.n_heads
     small_model_config = ref_config
     
     seed = training_args.seed
@@ -40,49 +41,35 @@ def main():
 
     # Train
     loaded_dataset = torch.load(data_args.train_file)
-    train_dataset = []
-    for bt in tqdm(loaded_dataset):
-        new_dic = {'input_ids': numpy.asarray(bt), 'labels': numpy.asarray(bt)}
-        train_dataset += [new_dic] 
-    train_dataset = Dataset.from_pandas(pd.DataFrame(data=train_dataset))  
+    
+    if len(loaded_dataset) > 1:
+        train_dataset = []
+        data, labels = loaded_dataset
+        for arr_bt, arr_label in tqdm(zip(data, labels)):
+            for bt, label in tqdm(zip(arr_bt, arr_label)):
+                new_dic = {'input_ids': numpy.asarray(bt), 'labels': numpy.asarray(label)}
+                train_dataset += [new_dic] 
+        train_dataset = Dataset.from_pandas(pd.DataFrame(data=train_dataset))  
 
     if data_args.subsample != -1:
         # shuffle then select
-        train_dataset = train_dataset.shuffle(seed=seed).select(range(data_args.subsample))
+        train_dataset = train_dataset.shuffle(seed=seed).select(range(min(data_args.subsample, len(train_dataset))))
 
     # Eval
     loaded_dataset = torch.load(data_args.eval_file)
-    eval_dataset = []
-    for bt in tqdm(loaded_dataset):
-        new_dic = {'input_ids': numpy.asarray(bt)}
-        eval_dataset += [new_dic] 
-    eval_dataset = Dataset.from_pandas(pd.DataFrame(data=eval_dataset))  
-    
+    if len(loaded_dataset) > 1:
+        eval_dataset = []
+        for arr_bt, arr_label in tqdm(zip(data, labels)):
+            for bt, label in tqdm(zip(arr_bt, arr_label)):
+                new_dic = {'input_ids': numpy.asarray(bt), 'labels': numpy.asarray(label)}
+                eval_dataset += [new_dic] 
+        eval_dataset = Dataset.from_pandas(pd.DataFrame(data=eval_dataset))  
+        
     
     embedding_size = model.get_input_embeddings().weight.shape[0]
     if len(tokenizer) > embedding_size:
         model.resize_token_embeddings(len(tokenizer))
 
-    train_dataset = encode_data(train_dataset,
-                                tokenizer,
-                                max_seq_length=data_args.max_sequence_length,
-                                processing_num_workers=data_args.preprocessing_num_workers,
-                                overwrite_cache=data_args.overwrite_cache,
-                                cache_dir=model_args.cache_dir + '/' + data_args.train_split + '_cache.arrow',
-                                no_tokenizer=False,
-                                chunk_tokenizer=False
-                                )
-
-    eval_dataset = encode_data(eval_dataset,
-                            tokenizer,
-                            max_seq_length=data_args.max_sequence_length,
-                            processing_num_workers=data_args.preprocessing_num_workers,
-                            overwrite_cache=data_args.overwrite_cache,
-                            cache_dir=model_args.cache_dir + '/' + data_args.train_split + '_eval_cache.arrow',
-                            no_tokenizer=False,
-                            chunk_tokenizer=False
-                            )
-      
 
     ### --- This is a weird way --- ###
     try:
@@ -96,9 +83,6 @@ def main():
         eval_dataset = eval_dataset
     ### --- This is a weird way --- ###
 
-    
-    if data_args.subsample != -1:
-        train_dataset = train_dataset.select(range(data_args.subsample))
 
     ### Define Trainer ###    
     trainer_class = Trainer
