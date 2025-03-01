@@ -15,4 +15,4 @@ Please check distil.sh to modify necessary arguments as needed
 
 3. Compute correlations
 
-Please run python probing.py to get correlation scores for a checkpoint
+Please run python probing.py to get correlations to low degree polynomials on the output of a checkpoint

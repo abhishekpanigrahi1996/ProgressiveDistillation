@@ -1,6 +1,6 @@
 ## Progressive distillation induces an implicit curriculum
 
-This repository contains the code for our paper [Progressive distillation induces an implicit curriculum](https://openreview.net/forum?id=wPMRwmytZe). It has been accepted as an Oral paper at [ICLR 2025](https://iclr.cc/)
+This repository contains the code for our paper [Progressive distillation induces an implicit curriculum](https://openreview.net/forum?id=wPMRwmytZe). It has been accepted for oral presentation at [ICLR 2025](https://iclr.cc/).
 
 ## Quick Links
 
@@ -24,7 +24,7 @@ Next, we study the reason why progressive distillation might be helping the stud
 
 ![](figures/spike_parity.png)
 
-imilar observations extend to PCFG and natural languages, where models are trained for masked prediction. Progressive distillation helps the student learn structures of the data, as measured by dependencies on n-grams and accuracy of PCFG non-terminal prediction. For PCFG, the teacher model exhibits 3 phases in the loss. The 2nd one resembles the phase transition in parity, during which the teacher provides an implicit curriculum via increased dependency on easy-to-learn short n-grams, and checkpoint in the middle of the phase transition is the most helpful.
+Similar observations extend to PCFG and natural languages, where models are trained for masked prediction. Progressive distillation helps the student learn structures of the data, as measured by dependencies on n-grams and accuracy of PCFG non-terminal prediction. For PCFG, the teacher model exhibits 3 phases in the loss. The 2nd one resembles the phase transition in parity, during which the teacher provides an implicit curriculum via increased dependency on easy-to-learn short n-grams, and checkpoint in the middle of the phase transition is the most helpful.
 
 ![](figures/curr_pcfg.png)
 
@@ -35,7 +35,13 @@ We show similar results for natural languages (Wikipedia+Books), where n-gram cu
 
 ## Experiments
 
+We provide 3 main folders to reproduce the following 3 sets of experiments:
 
+- MLPs on parity ([Link](parity_mlp))
+- BERT on PCFG ([Link](PCFG_mlm))
+- GPT2 on PCFG ([Link](PCFG_autoregressive))
+
+Each folder contains detailed instructions on how to run the experiments. Please refer to them.
 
 
 ## Bugs or Questions?
@@ -46,7 +52,7 @@ If you have any questions related to the code or the paper, feel free to email A
 
 Please cite our paper if you find our paper or this repo helpful:
 ```bibtex
-@misc{panigrahi2025progressive,
+@inproceedings{panigrahi2025progressive,
 title={Progressive distillation induces an implicit curriculum},
 author={Abhishek Panigrahi and Bingbin Liu and Sadhika Malladi and Andrej Risteski and Surbhi Goel},
 booktitle={The Thirteenth International Conference on Learning Representations},
